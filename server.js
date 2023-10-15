@@ -61,6 +61,18 @@ const auth = function(req, res, next) {
 /**
  * Routing
  */
+const login = (req, res, next) => {
+    passport.authenticate('local', (err, user, info) => {
+        if (err) { return next(err); }
+        if (info) {
+            return res.status(401).json({error: info.msg})
+        }
+        req.logIn(user, function(err) {
+          if (err) { return next(err); }
+          return res.status(200).send(user);
+        });
+      })(req, res, next);
+}
 
 app.post('/api/login', (req, res, next) => {
     passport.authenticate('local', (err, user, info) => {
@@ -86,7 +98,7 @@ app.get('/api/user', async(req, res) => {
 })
 
 
-app.post('/api/register' , async(req, res) => {
+app.post('/api/register' , async(req, res, next) => {
     if(req.session.user) {
         res.end()
         return;
@@ -102,7 +114,8 @@ app.post('/api/register' , async(req, res) => {
             if(err){
                 console.log(err);
             } else {
-                res.send(req.session.user)
+                //res.send(req.session.user)
+                login(req,res,next)
             }
         })
     })

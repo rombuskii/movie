@@ -25,6 +25,15 @@ const Login = () => {
         .catch(err => {
             setErr('Invalid login details')
         });
+    } else {
+        await axios.post('http://localhost:3001/api/register', {
+          username,
+          password
+        },{withCredentials: true}).then(response => {
+            setUser(response.data);
+            setIsAuthenticated(true);
+            router.push('/')
+        })
     }
 }
 

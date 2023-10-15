@@ -4,6 +4,7 @@ import { useUser } from '@/context/UserContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
+
 export default function Home() {
   const {isAuthenticated, user} = useUser();
   console.log(user)
