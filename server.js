@@ -6,6 +6,7 @@ const MongoStore = require('connect-mongo');
 const cors = require('cors')
 require('dotenv').config();
 const User = require('./models/user.model')
+const Review = require('./models/review.model')
 const bcrypt = require('bcrypt')
 const passport = require('passport')
 const initializePassport = require('./config/passport')
@@ -106,7 +107,7 @@ app.post('/api/register' , async(req, res, next) => {
     //Add the user to the database
     let {username, password} = req.body
     password = await bcrypt.hash(password, 10);
-    await User.create({username, password, admin: false}).catch(() => res.status(500).send('User exists'))
+    await User.create({username, password, admin: false}).catch(() => res.status(400).send('User already exists'))
     await User.findOne({username: username}).then(user => {
         const info = {username: user.username, id: user.id}
         req.session.user = info
@@ -119,6 +120,49 @@ app.post('/api/register' , async(req, res, next) => {
             }
         })
     })
+})
+
+app.get('/api/review/tv/:id', async(req, res) => {
+    const show  = 'tv/' + req.params.id
+    const showReview = await Review.findOne({show: show})
+    res.json(showReview)
+})
+
+app.delete('/api/review/tv/:id/:reviewId', async(req,res) => {
+    const show  = 'tv/' + req.params.id
+    const reviewId = req.params.reviewId
+    await Review.updateOne({show: show}, {$pull: {reviews: {_id: reviewId}}})
+    res.end();
+})
+
+app.post('/api/review', async(req, res) => {
+    const {show, user, content} = req.body
+    const showReview = await Review.findOne({show: show})
+    if (showReview) {
+        const reviews = showReview.reviews
+        reviews.push({user: user, body: content})
+        await Review.updateOne({show: show}, { $set: {reviews: reviews}})
+        res.status(200);
+        res.end()
+    } else {
+        await Review.create({show: show, reviews: [{user:user, body:content}]})
+        res.status(200);
+        res.end()
+    }
+})
+
+app.post('/api/friend', async(req, res) => {
+   const {friend, username} = req.body 
+   await User.updateOne({username: friend}, { $push: {friends: username }})
+   .catch(err => res.status(401).json({error: "User doesn't exist"}))
+   await User.updateOne({username: username}, { $push: {friends: friend }});
+
+})
+
+app.get('/api/users/:username', async(req, res) => {
+    const username = req.params.username
+    const users = await User.find({username: username})
+    res.status(200).json(users)
 })
 
 app.get('/api/logout',(req,res) => {

@@ -18,7 +18,7 @@ const Search = ({movies}) => {
     const results = movies.results
   return (
     <div>
-        <div className='grid grid-cols-5 items-center'>
+        <div className='grid grid-cols-3 xl:grid-cols-5 items-center'>
         {results.map((movie, index) => {
             return (
                 <MovieTile movie={movie}/>

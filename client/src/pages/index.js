@@ -1,24 +1,38 @@
 import Image from 'next/image'
 import { Inter } from 'next/font/google'
 import { useUser } from '@/context/UserContext'
+import MovieSlab from '@/components/MovieSlab'
 
 const inter = Inter({ subsets: ['latin'] })
 
+export async function getServerSideProps(context) {
+  let movies = await fetch(`https://consumet-pied.vercel.app/movies/flixhq/the`)
+  .then(response => response.json())
+  return {
+      props: {movies}
+  }
 
-export default function Home() {
+}
+
+export default function Home({movies}) {
+  const results = movies.results
   const {isAuthenticated, user} = useUser();
   console.log(user)
-  if(!isAuthenticated) {
   return (
     <div>
-      <h1>Welcome to Show Shelf</h1>
+      <h1 className='text-2xl'>Favorites</h1>
+      <hr className='border-2'/>
+      <h1 className='text-2xl'>Your Watchlist</h1>
+      <hr className='border-2'/>
+      <h1 className='text-2xl'>Recommended</h1>
+      <hr className='border-2'/>
+      <div className='flex overflow-auto'>
+      {results.map((movie, index) => {
+        return (
+          <MovieSlab movie={movie}/>
+        )
+      })}
+      </div>
     </div>
   )
-} else {
-  return (
-    <div>
-      <h1>Glad to see you, {user?.username}</h1>
-    </div>
-  )
-}
 }

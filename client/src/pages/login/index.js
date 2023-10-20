@@ -34,6 +34,9 @@ const Login = () => {
             setIsAuthenticated(true);
             router.push('/')
         })
+        .catch(err => {
+            setErr('User already exists')
+        })
     }
 }
 
