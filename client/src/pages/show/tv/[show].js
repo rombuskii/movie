@@ -61,14 +61,15 @@ const Show = ({show, reviews}) => {
       if(!user) return;
       let newReviews; 
       if(!showReview) {
-          newReviews = [{user: user.username, body:input}]
+          newReviews = [{user: user.username, body:input, title: show.title}]
       } else {
-          newReviews = [...showReview, {user: user.username, body:input}]
+          newReviews = [...showReview, {user: user.username, body:input, title: show.title}]
        }
       setShowReview(newReviews);
       await axios.post('http://localhost:3001/api/review', {
           user: user.username,
           show: 'tv/' + id,
+          title: show.title,
           content: input
       })
       setInput('')

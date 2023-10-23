@@ -7,6 +7,7 @@ const Review = mongoose.model(
     reviews: [{
         user: String,
         body: String,
+        title: String,
     }],
   })
 );

@@ -128,6 +128,24 @@ app.get('/api/review/tv/:id', async(req, res) => {
     res.json(showReview)
 })
 
+app.get('/api/review/movie/:id', async(req, res) => {
+    const show  = 'movie/' + req.params.id
+    const showReview = await Review.findOne({show: show})
+    res.json(showReview)
+})
+
+app.get('/api/review/:user', async(req, res) => {
+    const user  = req.params.user
+    const reviews = await Review.find({"reviews.user": user})
+    const cleanReviews = reviews.map(review => {
+       let filtered = review.reviews.filter(rev => rev.user === user)
+       return {show: review.show, reviews: [...filtered]};
+    })
+
+    res.json(cleanReviews)
+
+})
+
 app.delete('/api/review/tv/:id/:reviewId', async(req,res) => {
     const show  = 'tv/' + req.params.id
     const reviewId = req.params.reviewId
@@ -135,17 +153,24 @@ app.delete('/api/review/tv/:id/:reviewId', async(req,res) => {
     res.end();
 })
 
+app.delete('/api/review/movie/:id/:reviewId', async(req,res) => {
+    const show  = 'movie/' + req.params.id
+    const reviewId = req.params.reviewId
+    await Review.updateOne({show: show}, {$pull: {reviews: {_id: reviewId}}})
+    res.end();
+})
+
 app.post('/api/review', async(req, res) => {
-    const {show, user, content} = req.body
+    const {show, title, user, content} = req.body
     const showReview = await Review.findOne({show: show})
     if (showReview) {
         const reviews = showReview.reviews
-        reviews.push({user: user, body: content})
+        reviews.push({user: user, body: content, title})
         await Review.updateOne({show: show}, { $set: {reviews: reviews}})
         res.status(200);
         res.end()
     } else {
-        await Review.create({show: show, reviews: [{user:user, body:content}]})
+        await Review.create({show: show, reviews: [{user:user, body:content, title}]})
         res.status(200);
         res.end()
     }
@@ -159,10 +184,15 @@ app.post('/api/friend', async(req, res) => {
 
 })
 
+
 app.get('/api/users/:username', async(req, res) => {
     const username = req.params.username
     const users = await User.find({username: username})
     res.status(200).json(users)
+})
+
+app.get('*', async(req, res) => {
+    res.send('This is the server!')
 })
 
 app.get('/api/logout',(req,res) => {

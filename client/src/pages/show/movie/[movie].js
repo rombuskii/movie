@@ -5,11 +5,11 @@ import React, {useState, useEffect} from 'react'
 import axios from 'axios'
 
 export async function getServerSideProps(context) {
-    const id = 'tv/' + context.params.movie
+    const id =  context.params.movie
     console.log(id)
-    let movie = await fetch(`https://consumet-pied.vercel.app/movies/flixhq/info?id=${id}`)
+    let movie = await fetch(`https://consumet-pied.vercel.app/movies/flixhq/info?id=movie/${id}`)
     .then(response => response.json())
-    let reviews = await fetch(`http://localhost:3001/api/review/${id}`)
+    let reviews = await fetch(`http://localhost:3001/api/review/movie/${id}`)
     .then(response => response.json());
 
     return {
@@ -64,15 +64,16 @@ const Movie = ({movie, reviews}) => {
         if(!user) return;
         let newReviews; 
         if(!movieReview) {
-            newReviews = [{user: user.username, body:input}]
+            newReviews = [{user: user.username, body:input, title: movie.title}]
         } else {
-            newReviews = [...movieReview, {user: user.username, body:input}]
+            newReviews = [...movieReview, {user: user.username, body:input, title: movie.title}]
          }
         setMovieReview(newReviews);
         await axios.post('http://localhost:3001/api/review', {
             user: user.username,
-            show: 'tv/' + id,
-            content: input
+            show: 'movie/' + id,
+            content: input,
+            title: movie.title
         })
         setInput('')
     }
@@ -86,6 +87,7 @@ const Movie = ({movie, reviews}) => {
 
   return (
     <>
+    {
     <div className='mb-3 flex flex-col gap-5 justify-center items-center'>
         <h1>{movie.title}</h1>
         <span className='flex gap-3'>
@@ -118,7 +120,9 @@ const Movie = ({movie, reviews}) => {
         </div>
         </div>
     </div>
+            }
     </>
+            
   )
 }
 
