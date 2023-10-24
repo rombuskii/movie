@@ -82,7 +82,7 @@ const Movie = ({movie, reviews}) => {
         e.preventDefault();
         const newReviews = movieReview.filter((review, i) => i !== index);
         setMovieReview(newReviews)
-        await axios.delete(`http://localhost:3001/api/review/tv/${id}/${reviewId}`)
+        await axios.delete(`http://localhost:3001/api/review/movie/${id}/${reviewId}`)
     }
 
   return (

@@ -51,11 +51,10 @@ const Profile = () => {
             username: user?.username,
             friend: friend
         }).catch(err => setErr("User doesn't exist"))
-        setFriends(...friends, friend)
+        setFriends([...friends, friend])
         setFriend('')
         setErr('')
     }
-    console.log(reviews[0][0]?.title)
   return (
     <div className='p-2 flex flex-col gap-5'>
         <div>
@@ -95,6 +94,7 @@ const Profile = () => {
             <input value={friend} onChange={e => setFriend(e.target.value)} id='friend' required={true} type='text' className='focus:border-black border-2 outline-none w-full max-w-[50ch] p-2 rounded-lg text-black'/>
             <button className='border duration-300 mx-auto w-full max-w-[80ch] hover:border-2 hover: hover:scale-110 bg-emerald-500 text-white rounded-xl p-2' type='submit'>Add Friend</button>
         </form>
+        {err}
         <hr/>
         <h1 className='text-2xl'>Comments</h1>
         {reviews.length > 0 && reviews.map((review, i) => 

@@ -146,6 +146,14 @@ app.get('/api/review/:user', async(req, res) => {
 
 })
 
+app.delete('/api/review/movie/:id/:reviewId', async(req,res) => {
+    const show  = 'movie/' + req.params.id
+    console.log(show)
+    const reviewId = req.params.reviewId
+    await Review.updateOne({show: show}, {$pull: {reviews: {_id: reviewId}}})
+    res.end();
+})
+
 app.delete('/api/review/tv/:id/:reviewId', async(req,res) => {
     const show  = 'tv/' + req.params.id
     const reviewId = req.params.reviewId
@@ -179,9 +187,9 @@ app.post('/api/review', async(req, res) => {
 app.post('/api/friend', async(req, res) => {
    const {friend, username} = req.body 
    await User.updateOne({username: friend}, { $push: {friends: username }})
-   .catch(err => res.status(401).json({error: "User doesn't exist"}))
-   await User.updateOne({username: username}, { $push: {friends: friend }});
-
+   .catch(err => res.status(401).json({error: "User doesn't exist"})).then(async () => {
+    await User.updateOne({username: username}, { $push: {friends: friend }});
+   })
 })
 
 
