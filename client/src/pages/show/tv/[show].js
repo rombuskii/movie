@@ -86,17 +86,17 @@ const Show = ({ show, reviews }) => {
 
 
 
-    function addToShowshelf(show) {
-        return undefined;
-    }
-
-    function removeFromShowshelf(show) {
-        
-    }
-
-    function updateShowshelf(liked, show) {
-        liked ? addToShowshelf(show) : removeFromShowshelf(show);
-    }
+    // function addToShowshelf(show) {
+    //     return undefined;
+    // }
+    //
+    // function removeFromShowshelf(show) {
+    //
+    // }
+    //
+    // function updateShowshelf(liked, show) {
+    //     liked ? addToShowshelf(show) : removeFromShowshelf(show);
+    // }
 
     return (
         <>
@@ -114,7 +114,7 @@ const Show = ({ show, reviews }) => {
                         onClick={(event) => {
                             event.preventDefault();
                             setLiked(!liked);
-                            updateShowshelf(liked, show);
+                            //updateShowshelf(liked, show); TODO
                         }}>
                         {liked ? <AiFillHeart /> : <AiOutlineHeart />}
                     </button>
