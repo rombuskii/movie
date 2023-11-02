@@ -6,7 +6,7 @@ import MovieSlab from '@/components/MovieSlab'
 const inter = Inter({ subsets: ['latin'] })
 
 export async function getServerSideProps(context) {
-  let movies = await fetch(`https://consumet-pied.vercel.app/movies/flixhq/the`)
+  let movies = await fetch(`https://consumet-pied.vercel.app/movies/flixhq/sonic`)
   .then(response => response.json())
   return {
       props: {movies}

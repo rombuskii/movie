@@ -8,15 +8,8 @@ const showShelf = mongoose.model(
         unique: true,
         required: true,
     },
-    password: {
-        type: String,
-        required: true,
-    },
-    admin: Boolean,
-    email: String,
-    friends: [String],
-    show_shelf: String,
-    birthday: Date,
+    watchlist: [String],
+    favorites: [String],
 
   })
 );
