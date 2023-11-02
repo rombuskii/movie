@@ -85,6 +85,19 @@ const Show = ({ show, reviews }) => {
     }
 
 
+
+    function addToShowshelf(show) {
+        return undefined;
+    }
+
+    function removeFromShowshelf(show) {
+        
+    }
+
+    function updateShowshelf(liked, show) {
+        liked ? addToShowshelf(show) : removeFromShowshelf(show);
+    }
+
     return (
         <>
             <div className='mb-3 flex flex-col gap-5 justify-center items-center'>
@@ -101,6 +114,7 @@ const Show = ({ show, reviews }) => {
                         onClick={(event) => {
                             event.preventDefault();
                             setLiked(!liked);
+                            updateShowshelf(liked, show);
                         }}>
                         {liked ? <AiFillHeart /> : <AiOutlineHeart />}
                     </button>
