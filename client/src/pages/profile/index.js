@@ -13,6 +13,7 @@ const Profile = () => {
     const [email, setEmail] = useState(user?.email);
     const [friend, setFriend] = useState('');
     const [friends, setFriends] = useState(user?.friends);
+    const [pwdErr, setPwdErr] = useState('')
     const [err, setErr] = useState('')
     const [reviews, setReviews] = useState([{}]);
 
@@ -25,16 +26,25 @@ const Profile = () => {
 
     useEffect(() => {
         if(user) {
-            console.log('User is:' + user.username)
             getReviews()
         };
     }, [])
 
     const changePassword = async(e) => {
         e.preventDefault();
-        alert('Changed Password')
-        setOldPassword('')
-        setNewPassword('')
+        await axios.post(`http://localhost:3001/api/reset-password/${user?.username}`,
+        {
+            password: oldPassword,
+            newPassword: newPassword
+        }
+        ).then(() => {
+            setOldPassword('');
+            setNewPassword('');
+            setPwdErr('')
+        })
+        .catch(err => {
+            setPwdErr('Invalid Password')
+        })
     }
 
     const updateAccount = async(e) => {
@@ -46,14 +56,21 @@ const Profile = () => {
     }
 
     const addFriend = async(e) => {
-        e.preventDefault()
+        e.preventDefault();
+        if(!user) {
+            return
+        }
         await axios.post('http://localhost:3001/api/friend', {
             username: user?.username,
             friend: friend
-        }).catch(err => setErr("User doesn't exist"))
-        setFriends([...friends, friend])
-        setFriend('')
-        setErr('')
+        })
+        .then(() => {
+            setFriends([...friends, friend])
+            setFriend('')
+            setErr('')
+        })
+        .catch(() => setErr("Invalid user"))
+        
     }
   return (
     <div className='p-2 flex flex-col gap-5'>
@@ -63,6 +80,7 @@ const Profile = () => {
         <hr/>
         <form onSubmit={changePassword} className='mt-2 text-xl flex gap-3 flex-col'>
             <h1 className='text-2xl'>Reset Password</h1>
+            <p className='text-red-500'>{pwdErr}</p>
             <label htmlFor='current-password'>Current Password:</label>
             <input value={oldPassword} onChange={e => setOldPassword(e.target.value)} id='current-password' required={true} type='password' className='focus:border-black border-2 outline-none w-full max-w-[50ch] p-2 rounded-lg text-black'/>
             <label htmlFor='new-password'>New Password:</label>
@@ -81,8 +99,8 @@ const Profile = () => {
         <hr/>
         <form onSubmit={addFriend} className='mt-2 text-xl flex gap-3 flex-col'>
             <h1 className='text-2xl'>Friends</h1>
-            {friends?.length == 0 && <p>No friends yet :/</p>}
-            {friends?.map((friend, index) => {
+            {user && friends?.length == 0 && <p>No friends yet :/</p>}
+            {user && user?.friends.map((friend, index) => {
                 return (
                     <Link key={index} className='duration-300 hover:text-cyan-300' href={`/profile/${friend}`}>
                         {friend}
@@ -91,10 +109,10 @@ const Profile = () => {
             })}
             <h1 className='text-2xl'>Add Friend</h1>
             <label htmlFor='friend'>Username:</label>
+            <p className='text-red-500'>{err}</p>
             <input value={friend} onChange={e => setFriend(e.target.value)} id='friend' required={true} type='text' className='focus:border-black border-2 outline-none w-full max-w-[50ch] p-2 rounded-lg text-black'/>
             <button className='border duration-300 mx-auto w-full max-w-[80ch] hover:border-2 hover: hover:scale-110 bg-emerald-500 text-white rounded-xl p-2' type='submit'>Add Friend</button>
         </form>
-        {err}
         <hr/>
         <h1 className='text-2xl'>Comments</h1>
         {reviews.length > 0 && reviews.map((review, i) => 

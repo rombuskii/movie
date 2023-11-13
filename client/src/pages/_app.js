@@ -2,8 +2,14 @@ import '@/styles/globals.css'
 import { UserProvider } from '@/context/UserContext'
 import Layout from '@/components/Layout'
 import Head from 'next/head'
+import { config } from '@fortawesome/fontawesome-svg-core'
+import '@fortawesome/fontawesome-svg-core/styles.css'
+config.autoAddCss = false
+import { ChakraProvider } from '@chakra-ui/react'
+
 export default function App({ Component, pageProps }) {
   return (
+    <ChakraProvider>
     <UserProvider>
       <Head>
       <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -14,5 +20,6 @@ export default function App({ Component, pageProps }) {
       <Component {...pageProps} />
       </Layout>
     </UserProvider>
+    </ChakraProvider>
   )
 }

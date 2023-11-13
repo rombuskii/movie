@@ -1,24 +1,21 @@
 const mongoose = require("mongoose");
 
-const showShelf = mongoose.model(
-  "showShelf",
+const ShowShelf = mongoose.model(
+  "ShowShelf",
   new mongoose.Schema({
-    username: {
-        type: String,
-        unique: true,
-        required: true,
+    user: String,
+    favorites: {
+      type: [String],
     },
-    password: {
-        type: String,
-        required: true,
+    ratings: [{
+      rating: Number,
+      id: String,
+      title: String,
+  }],
+    watchlist: {
+      type: [String],
     },
-    admin: Boolean,
-    email: String,
-    friends: [String],
-    show_shelf: String,
-    birthday: Date,
-
   })
 );
 
-module.exports = showShelf;
+module.exports = ShowShelf;

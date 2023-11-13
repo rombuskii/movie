@@ -35,7 +35,7 @@ export default function Home({movies}) {
       <div className='flex my-2 overflow-auto'>
       {results.map((movie, index) => {
         return (
-          <MovieSlab movie={movie}/>
+          <MovieSlab key={index} movie={movie}/>
         )
       })}
       </div>

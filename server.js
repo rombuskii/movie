@@ -11,7 +11,8 @@ const bcrypt = require('bcrypt')
 const passport = require('passport')
 const initializePassport = require('./config/passport')
 initializePassport(passport)
-const flash = require('express-flash')
+const flash = require('express-flash');
+const ShowShelf = require('./models/showShelf.model');
 
 const PORT = process.env.PORT || 3001;
 
@@ -143,6 +144,110 @@ app.get('/api/review/:user', async(req, res) => {
     })
 
     res.json(cleanReviews)
+})
+
+app.put('/api/favorite/tv/:id', async(req, res) => {
+    const show  = 'tv/' + req.params.id
+    const {username} = req.body;
+    if(!username) {
+        return res.status(400).send('No user')
+    }
+    const showshelf = await ShowShelf.findOne({user: username})
+    if(!showshelf) {
+        await ShowShelf.create({user: username, favorites: [show], ratings: []});
+    } else {
+        const updatedFavs = showshelf.favorites;
+        if(updatedFavs.some(r => r === show)) {
+        const filtered = updatedFavs.filter((id) => id !== show);
+        console.log(filtered)
+        await ShowShelf.updateOne({user: username}, { $set: {favorites: filtered}})
+        } else {
+        updatedFavs.push(show);
+        await ShowShelf.updateOne({user: username}, { $set: {favorites: updatedFavs}})
+    }
+    }
+});
+
+app.post('/api/favorite/movie/:id', async(req, res) => {
+    const movie  = 'movie/' + req.params.id
+    const {username} = req.body;
+    if(!username) {
+        return res.status(400).send('No user')
+    }
+    const showshelf = await ShowShelf.findOne({user: username})
+    if(!showshelf) {
+        await ShowShelf.create({user: username, favorites: [movie], ratings: []});
+    } else {
+        const updatedFavs = showshelf.favorites;
+        if(updatedFavs.some(r => r === movie)) {
+        const filtered = updatedFavs.filter((id) => id !== movie);
+        console.log(filtered)
+        await ShowShelf.updateOne({user: username}, { $set: {favorites: filtered}})
+        } else {
+        updatedFavs.push(movie);
+        await ShowShelf.updateOne({user: username}, { $set: {favorites: updatedFavs}})
+    }
+    }
+});
+
+app.post('/api/rating/tv/:id', async(req, res) => {
+    const show  = 'tv/' + req.params.id
+    const {rating, title, username} = req.body;
+    if(!username) {
+        return res.status(400).send('No user')
+    }
+    const showshelf = await ShowShelf.findOne({user: username})
+    if(!showshelf) {
+        await ShowShelf.create({user: username, favorites: [], ratings: [{rating: rating, id: show, title: title}]});
+    } else {
+        const updatedRatings = showshelf.ratings;
+        if(updatedRatings.some(r => r.title === title)) {
+            updatedRatings.map((show, i) => {
+                if(show.title === title) {
+                    show.rating = rating
+                }
+                return show
+            })
+        } else {
+            updatedRatings.push({rating: rating, id: show, title: title});
+        }
+        await ShowShelf.updateOne({user: username}, { $set: {ratings: updatedRatings}})
+    }
+});
+
+app.post('/api/rating/movie/:id', async(req, res) => {
+    const movie  = 'movie/' + req.params.id
+    const {rating, title, username} = req.body;
+    if(!username) {
+        return res.status(400).send('No user')
+    }
+    const showshelf = await ShowShelf.findOne({user: username})
+    if(!showshelf) {
+        await ShowShelf.create({user: username, favorites: [], ratings: [{rating: rating, id: movie, title: title}]});
+    } else {
+        const updatedRatings = showshelf.ratings;
+        if(updatedRatings.some(r => r.title === title)) {
+            updatedRatings.map((movie, i) => {
+                if(movie.title === title) {
+                    movie.rating = rating
+                }
+                return movie
+            })
+        } else {
+            updatedRatings.push({rating: rating, id: movie, title: title});
+        }
+        await ShowShelf.updateOne({user: username}, { $set: {ratings: updatedRatings}})
+    }
+});
+
+app.get('/api/showshelf/:username', async(req, res) => {
+    const {username} = req.params;
+    if(!username) {
+        return res.status(400).send('No user')
+    }
+    const showshelf = await ShowShelf.findOne({user: username})
+    res.send(showshelf);
+
 
 })
 
@@ -185,13 +290,33 @@ app.post('/api/review', async(req, res) => {
 })
 
 app.post('/api/friend', async(req, res) => {
-   const {friend, username} = req.body 
-   await User.updateOne({username: friend}, { $push: {friends: username }})
-   .catch(err => res.status(401).json({error: "User doesn't exist"})).then(async () => {
-    await User.updateOne({username: username}, { $push: {friends: friend }});
-   })
+   const {friend, username} = req.body
+   const user = await User.findOne({username: friend});
+   if(!user || (friend === username) || user.friends.includes(username)) {
+    res.status(400).send("Invalid input");
+    res.end();
+    return;
+   }
+    await User.updateOne({username: friend}, { $push: {friends: username }})
+    .then(() => User.updateOne({username: username}, { $push: {friends: friend }}));
+
 })
 
+app.post('/api/password-reset/:username', async(req, res) => {
+    const username = req.params.username
+    const {password, newPassword} = req.body;
+    const user = await User.findOne({username: username})
+    const hash = user.password
+    const validPassword = await bcrypt.compare(password, hash)
+    if(validPassword) {
+        const hashedPassword = await bcrypt.hash(newPassword, 10)
+        await User.updateOne({username: username}, {$set: {password: hashedPassword}})
+        res.status(200).send('Password Updated!')
+    } else {
+        res.status(400).send('Invaliid Password')
+    }
+    
+})
 
 app.get('/api/users/:username', async(req, res) => {
     const username = req.params.username

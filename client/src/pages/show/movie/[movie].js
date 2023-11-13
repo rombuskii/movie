@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/router'
 import React, {useState, useEffect} from 'react'
 import axios from 'axios'
+import StarRatings from 'react-star-ratings'
 
 export async function getServerSideProps(context) {
     const id =  context.params.movie
@@ -58,6 +59,14 @@ const Movie = ({movie, reviews}) => {
     const {user} = useUser();
     const [movieReview, setMovieReview] = useState(reviews?.reviews)
     const [input, setInput] = useState('')
+    const [rating, setRating] = useState(0);
+    const updateRating = async(newRating, name) => {
+        setRating(newRating);
+    }
+    const [liked, setLiked] = useState(false);
+    const favorite = async() => {
+        setLiked(prev => !prev);
+    }
 
     const handleSubmit = async(e) => {
         e.preventDefault();
@@ -89,7 +98,7 @@ const Movie = ({movie, reviews}) => {
     <>
     {
     <div className='mb-3 flex flex-col gap-5 justify-center items-center'>
-        <h1>{movie.title}</h1>
+        <h1 className='text-2xl'>{movie.title} <i onClick={favorite} className={`duration-300 text-md sm:text-lg md:text-xl lg:text-2xl hover:scale-110  cursor-pointer select-none ${liked ? 'text-red-500 fa-solid' : 'fa-regular'} fa-heart`}></i></h1>
         <span className='flex gap-3'>
         {movie.genres.map((genre, index) => {
             return (
@@ -102,7 +111,10 @@ const Movie = ({movie, reviews}) => {
         <p>{movie.description}</p>
         <div className='p-2 text-black w-full bg-red-300 rounded-xl'>
         <form onSubmit={handleSubmit} className='mb-5'>
+            <div className='flex justify-between'>
             <h1 className='text-xl'>Leave a Review 💖:</h1>
+            <StarRatings starDimension='2rem' rating={rating} starHoverColor="yellow" starRatedColor="yellow" changeRating={updateRating} numberOfStars={5} name='rating'/>
+            </div>
             <hr className='border-black border'/>
             <input value={input} onChange={e => setInput(e.target.value)} placeholder='Say something nice <3' className='mt-2 outline-none select-none border-2 border-black text-black w-full p-1 rounded-lg' type='text'/>
         </form>
