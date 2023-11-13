@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import React, {useState, useEffect} from 'react'
 import axios from 'axios'
 import StarRatings from 'react-star-ratings'
+import { useToast } from '@chakra-ui/react'
 
 export async function getServerSideProps(context) {
     const id =  context.params.movie
@@ -20,51 +21,90 @@ export async function getServerSideProps(context) {
 }
 
 
-/**
- * 
-  "id": "string",
-  "title": "string",
-  "url": "string",
-  "image": "string",
-  "releaseDate": "string",
-  "description": "string",
-  "geners": [
-      "string"
-  ],
-  "type": "Movie",
-  "casts": [
-      "string"
-  ],
-  "tags": [
-      "string"
-  ],
-  "production": "string",
-  "duration": "string",
-  "episodes": [
-      {
-      "id": "string",
-      "url": "string",
-      "title": "string",
-      "number": 0,
-      "season": 0
-      }
-  ]
-}}
- */
-
-
 const Movie = ({movie, reviews}) => {
     const router = useRouter();
+    const toast = useToast();
     const id = router.query.movie;
     const {user} = useUser();
     const [movieReview, setMovieReview] = useState(reviews?.reviews)
     const [input, setInput] = useState('')
     const [rating, setRating] = useState(0);
-    const updateRating = async(newRating, name) => {
-        setRating(newRating);
-    }
     const [liked, setLiked] = useState(false);
+
+    const getShelf = async() => {
+        const username = user?.username
+        console.log(username)
+        const {data} = await axios.get(`http://localhost:3001/api/showshelf/${username}`);
+            if(data.favorites.some(fav => fav === 'movie/' + id)) {
+                setLiked(true);
+            }
+            const rating = data.ratings.find(rating => rating.title === movie.title)
+            if(rating) {
+                setRating(rating.rating);
+            }
+    }
+
+    useEffect(() => {
+        getShelf(); 
+    }, [])
+
+    const updateRating = async(newRating, name) => {
+        if(!user) {
+            toast({
+                title: 'User Not Logged In',
+                description: "Login for user functionality.",
+                status: 'error',
+                duration: 2000,
+                isClosable: true,
+            })
+        }
+        setRating(parseInt(newRating));
+        axios.post(`http://localhost:3001/api/rating/movie/${id}`, {
+            rating: newRating,
+            title: movie.title,
+            username: user.username
+        })
+        toast({
+            title: 'Rating Updated',
+            description: "",
+            status: 'info',
+            duration: 2000,
+            isClosable: true,
+        })
+    }
     const favorite = async() => {
+        if(!user) {
+            toast({
+                title: 'User Not Logged In',
+                description: "Login for user functionality.",
+                status: 'error',
+                duration: 2000,
+                isClosable: true,
+            })
+            return;
+        }
+        axios.put(`http://localhost:3001/api/favorite/movie/${id}`, {
+            username: user.username
+        })
+        if(liked) {
+            toast({
+                title: 'Removed From Favorites',
+                description: "",
+                status: 'error',
+                duration: 2000,
+                isClosable: true,
+            })
+        }
+        if(!liked) {
+            toast({
+                title: 'Added to Favorites',
+                description: "",
+                status: 'success',
+                duration: 2000,
+                isClosable: true,
+            })
+
+        }
         setLiked(prev => !prev);
     }
 

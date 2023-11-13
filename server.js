@@ -168,12 +168,13 @@ app.put('/api/favorite/tv/:id', async(req, res) => {
     }
 });
 
-app.post('/api/favorite/movie/:id', async(req, res) => {
+app.put('/api/favorite/movie/:id', async(req, res) => {
     const movie  = 'movie/' + req.params.id
     const {username} = req.body;
     if(!username) {
         return res.status(400).send('No user')
     }
+    
     const showshelf = await ShowShelf.findOne({user: username})
     if(!showshelf) {
         await ShowShelf.create({user: username, favorites: [movie], ratings: []});
@@ -188,6 +189,7 @@ app.post('/api/favorite/movie/:id', async(req, res) => {
         await ShowShelf.updateOne({user: username}, { $set: {favorites: updatedFavs}})
     }
     }
+    res.end();
 });
 
 app.post('/api/rating/tv/:id', async(req, res) => {
