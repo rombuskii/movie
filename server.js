@@ -192,6 +192,30 @@ app.put('/api/favorite/movie/:id', async(req, res) => {
     res.end();
 });
 
+app.put('/api/watchlist/movie/:id', async(req, res) => {
+    const movie  = 'movie/' + req.params.id
+    const {username} = req.body;
+    if(!username) {
+        return res.status(400).send('No user')
+    }
+    
+    const showshelf = await ShowShelf.findOne({user: username})
+    if(!showshelf) {
+        await ShowShelf.create({user: username, watchlist: [movie], ratings: []});
+    } else {
+        const updatedList = showshelf.watchlist;
+        if(updatedList.some(r => r === movie)) {
+        const filtered = updatedList.filter((id) => id !== movie);
+        console.log(filtered)
+        await ShowShelf.updateOne({user: username}, { $set: {watchlist: filtered}})
+        } else {
+        updatedList.push(movie);
+        await ShowShelf.updateOne({user: username}, { $set: {watchlist: updatedFavs}})
+    }
+    }
+    res.end();
+});
+
 app.post('/api/rating/tv/:id', async(req, res) => {
     const show  = 'tv/' + req.params.id
     const {rating, title, username} = req.body;

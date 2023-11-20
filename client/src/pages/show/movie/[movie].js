@@ -30,6 +30,7 @@ const Movie = ({movie, reviews}) => {
     const [input, setInput] = useState('')
     const [rating, setRating] = useState(0);
     const [liked, setLiked] = useState(false);
+    const [onList, setOnList] = useState(false);
 
     const getShelf = async() => {
         const username = user?.username
@@ -37,6 +38,9 @@ const Movie = ({movie, reviews}) => {
         const {data} = await axios.get(`http://localhost:3001/api/showshelf/${username}`);
             if(data.favorites.some(fav => fav === 'movie/' + id)) {
                 setLiked(true);
+            }
+            if(data.watchlist.some(on => on === 'movie/' + id)) {
+                setOnList(true);
             }
             const rating = data.ratings.find(rating => rating.title === movie.title)
             if(rating) {
@@ -108,6 +112,42 @@ const Movie = ({movie, reviews}) => {
         setLiked(prev => !prev);
     }
 
+    const watchlist = async() => {
+        if(!user) {
+            toast({
+                title: 'User Not Logged In',
+                description: "Login for user functionality.",
+                status: 'error',
+                duration: 2000,
+                isClosable: true,
+            })
+            return;
+        }
+        axios.put(`http://localhost:3001/api/watchlist/movie/${id}`, {
+            username: user.username
+        })
+        if(onList) {
+            toast({
+                title: 'Removed From Watchlsit',
+                description: "",
+                status: 'error',
+                duration: 2000,
+                isClosable: true,
+            })
+        }
+        if(!onList) {
+            toast({
+                title: 'Added to Watchlist',
+                description: "",
+                status: 'success',
+                duration: 2000,
+                isClosable: true,
+            })
+
+        }
+        setOnList(prev => !prev);
+    }
+
     const handleSubmit = async(e) => {
         e.preventDefault();
         if(!user) return;
@@ -138,7 +178,11 @@ const Movie = ({movie, reviews}) => {
     <>
     {
     <div className='mb-3 flex flex-col gap-5 justify-center items-center'>
-        <h1 className='text-2xl'>{movie.title} <i onClick={favorite} className={`duration-300 text-md sm:text-lg md:text-xl lg:text-2xl hover:scale-110  cursor-pointer select-none ${liked ? 'text-red-500 fa-solid' : 'fa-regular'} fa-heart`}></i></h1>
+        <h1 className='text-2xl'>{movie.title} 
+        <i onClick={favorite} className={`duration-300 text-md sm:text-lg md:text-xl lg:text-2xl hover:scale-110  cursor-pointer select-none 
+        ${liked ? 'text-red-500 fa-solid' : 'fa-regular'} fa-heart`}></i>
+        <i onClick={watchlist} className={`duration-300 text-md sm:text-lg md:text-xl lg:text-2xl hover:scale-110  cursor-pointer select-none 
+        ${liked ? 'fa-plus' : 'fa-check'}`}></i></h1>
         <span className='flex gap-3'>
         {movie.genres.map((genre, index) => {
             return (
