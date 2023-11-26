@@ -1,17 +1,18 @@
 const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
+const Rating = require('./rating.model').schema
 
 const ShowShelf = mongoose.model(
   "ShowShelf",
   new mongoose.Schema({
-    user: String,
+    user: {
+      type: String,
+      unique: true,
+    },
     favorites: {
       type: [String],
     },
-    ratings: [{
-      rating: Number,
-      id: String,
-      title: String,
-  }],
+    ratings: [Rating],
     watchlist: {
       type: [String],
     },

@@ -10,11 +10,11 @@ const Review = require('./models/review.model')
 const bcrypt = require('bcrypt')
 const passport = require('passport')
 const initializePassport = require('./config/passport')
-initializePassport(passport)
 const flash = require('express-flash');
 const ShowShelf = require('./models/showShelf.model');
 
 const PORT = process.env.PORT || 3001;
+
 
 mongoose.connect(`mongodb+srv://admin:${process.env.DB_PASSWORD}@showshelf.qvcuviz.mongodb.net/showshelf`)
     .then(console.log("Connection Successful"))
@@ -26,16 +26,6 @@ const sessionStore =  MongoStore.create({
     autoRemove: 'native' 
 });
 
-app.set('trust proxy', 1)
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(express.static(__dirname));
-app.use(cors({
-    credentials: true,
-    origin: ['http://localhost:3000']
-})
-);
-app.use(flash())
 app.use(session({
     secret: process.env.TOKEN_SECRET,
     resave: false,
@@ -48,17 +38,30 @@ app.use(session({
     }*/
 }
 ));
+
+initializePassport(passport)
+
+app.set('trust proxy', 1)
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(express.static(__dirname));
+app.use(cors({
+    credentials: true,
+    origin: [process.env.FRONTEND_URL]
+})
+);
+app.use(flash())
 app.use(passport.initialize());
 app.use(passport.session());
 
 //Authentication
-const auth = function(req, res, next) {
-    if(req.isAuthenticated()) {
+const admin = function(req, res, next) {
+    console.log(req.session)
+    if(req.user && req.user.admin) {
         return next();
     }
-    res.sendStatus(401).json("not authenticated");
+    res.status(401).send("Authorization Failed: Require Admin Priveleges");
 }
-
 //
 /**
  * Routing
@@ -155,11 +158,11 @@ app.put('/api/favorite/tv/:id', async(req, res) => {
     const showshelf = await ShowShelf.findOne({user: username})
     if(!showshelf) {
         await ShowShelf.create({user: username, favorites: [show], ratings: []});
+
     } else {
         const updatedFavs = showshelf.favorites;
         if(updatedFavs.some(r => r === show)) {
         const filtered = updatedFavs.filter((id) => id !== show);
-        console.log(filtered)
         await ShowShelf.updateOne({user: username}, { $set: {favorites: filtered}})
         } else {
         updatedFavs.push(show);
@@ -182,7 +185,6 @@ app.put('/api/favorite/movie/:id', async(req, res) => {
         const updatedFavs = showshelf.favorites;
         if(updatedFavs.some(r => r === movie)) {
         const filtered = updatedFavs.filter((id) => id !== movie);
-        console.log(filtered)
         await ShowShelf.updateOne({user: username}, { $set: {favorites: filtered}})
         } else {
         updatedFavs.push(movie);
@@ -255,10 +257,15 @@ app.get('/api/showshelf/:username', async(req, res) => {
 
 app.delete('/api/review/movie/:id/:reviewId', async(req,res) => {
     const show  = 'movie/' + req.params.id
-    console.log(show)
     const reviewId = req.params.reviewId
     await Review.updateOne({show: show}, {$pull: {reviews: {_id: reviewId}}})
     res.end();
+})
+
+app.get('/api/friends/:username', async(req, res) => {
+    const {username} = req.params;
+    const user = await User.findOne({username: username})
+    res.send(user?.friends);
 })
 
 app.delete('/api/review/tv/:id/:reviewId', async(req,res) => {
@@ -300,8 +307,8 @@ app.post('/api/friend', async(req, res) => {
     return;
    }
     await User.updateOne({username: friend}, { $push: {friends: username }})
-    .then(() => User.updateOne({username: username}, { $push: {friends: friend }}));
-
+    await User.updateOne({username: username}, { $push: {friends: friend }});
+    res.send(200);
 })
 
 app.post('/api/password-reset/:username', async(req, res) => {
@@ -320,9 +327,21 @@ app.post('/api/password-reset/:username', async(req, res) => {
     
 })
 
+app.get('/api/users', admin,  async(req, res) => {
+    const users = await User.find({});
+    res.json(users);
+})
+
 app.get('/api/users/:username', async(req, res) => {
     const username = req.params.username
-    const users = await User.find({username: username})
+    const users = await User.findOne({username: username})
+    res.status(200).json(users)
+})
+
+app.get('/api/userlist/:username', async(req, res) => {
+    const username = req.params.username
+    const regex = new RegExp(`^${username}.*$`, 'i')
+    const users = await User.find({username: regex});
     res.status(200).json(users)
 })
 
@@ -330,11 +349,13 @@ app.get('*', async(req, res) => {
     res.send('This is the server!')
 })
 
-app.get('/api/logout',(req,res) => {
-    if(req.user || req.session)
+app.post('/api/logout', async(req, res) => {
+    req.session.destroy();
     req.logout((op, done) => {
         console.log('logged out')
     })
+    req.user = undefined;
+    res.send('Logged out');
 });
 
 

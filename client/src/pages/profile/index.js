@@ -2,37 +2,56 @@ import React, {useEffect, useState} from 'react'
 import { useUser } from '@/context/UserContext'
 import axios from 'axios'
 import Link from 'next/link'
+import { useToast } from '@chakra-ui/react'
 
 
 const Profile = () => {
     const {user} = useUser();
+    const toast = useToast();
     const [username, setUsername] = useState(user?.username)
     const [oldPassword, setOldPassword] = useState('')
     const [newPassword, setNewPassword] = useState('')
-    const [birthday, setBirthday] = useState(user?.birthday);
-    const [email, setEmail] = useState(user?.email);
+    const [birthday, setBirthday] = useState();
+    const [email, setEmail] = useState();
     const [friend, setFriend] = useState('');
-    const [friends, setFriends] = useState(user?.friends);
+    const [friends, setFriends] = useState([]);
     const [pwdErr, setPwdErr] = useState('')
     const [err, setErr] = useState('')
     const [reviews, setReviews] = useState([{}]);
+    console.log(reviews)
 
     const getReviews = async() => {
-        await axios.get(`http://localhost:3001/api/review/${username}`)
+        await axios.get(`${process.env.NEXT_PUBLIC_API_BASE}/review/${username}`)
         .then(response => {
             setReviews(response.data)
         })
-}
+    }
+    const getFriends = async() => {
+        await axios.get(`${process.env.NEXT_PUBLIC_API_BASE}/friends/${user?.username}`)
+        .then(response => setFriends(response.data));
+    }
 
     useEffect(() => {
-        if(user) {
-            getReviews()
+        if(user !== undefined) {
+            // setFriends(user.friends)
+            getReviews();
+            getFriends();
         };
     }, [])
 
     const changePassword = async(e) => {
         e.preventDefault();
-        await axios.post(`http://localhost:3001/api/reset-password/${user?.username}`,
+        if(!user) {
+            toast({
+                title: 'Not Logged In',
+                description: "Login for user functionality.",
+                status: 'error',
+                duration: 2000,
+                isClosable: true,
+            })
+            return;
+        }
+        await axios.post(`${process.env.NEXT_PUBLIC_API_BASE}/reset-password/${user?.username}`,
         {
             password: oldPassword,
             newPassword: newPassword
@@ -58,26 +77,44 @@ const Profile = () => {
     const addFriend = async(e) => {
         e.preventDefault();
         if(!user) {
+            toast({
+                title: 'Not Logged In',
+                description: "Login for user functionality.",
+                status: 'error',
+                duration: 2000,
+                isClosable: true,
+            })
             return
         }
-        await axios.post('http://localhost:3001/api/friend', {
+        try {
+        await axios.post(`${process.env.NEXT_PUBLIC_API_BASE}/friend`, {
             username: user?.username,
             friend: friend
         })
-        .then(() => {
-            setFriends([...friends, friend])
-            setFriend('')
-            setErr('')
+        setFriends([...friends, friend])
+        toast({
+            title: 'Friend Added',
+            description: `${friend} added to friends list!`,
+            status: 'success',
+            duration: 2000,
+            isClosable: true,
         })
-        .catch(() => setErr("Invalid user"))
-        
+        setFriend('')
+        setErr('')
+        }
+        catch{
+            setErr("Invalid user")
+            return;
+        }
     }
   return (
     <div className='p-2 flex flex-col gap-5'>
         <div>
-        <h1 className='text-2xl'>Username: {user?.username}</h1>
+        <h1 className='text-2xl'>Username: {user ? user.username : "Guest"}</h1>
         </div>
         <hr/>
+        {user &&
+        <div  className='p-2 flex flex-col gap-5'>
         <form onSubmit={changePassword} className='mt-2 text-xl flex gap-3 flex-col'>
             <h1 className='text-2xl'>Reset Password</h1>
             <p className='text-red-500'>{pwdErr}</p>
@@ -99,8 +136,8 @@ const Profile = () => {
         <hr/>
         <form onSubmit={addFriend} className='mt-2 text-xl flex gap-3 flex-col'>
             <h1 className='text-2xl'>Friends</h1>
-            {user && friends?.length == 0 && <p>No friends yet :/</p>}
-            {user && user?.friends.map((friend, index) => {
+            {user && friends?.length === 0 && <p>No friends yet :/</p>}
+            {friends.length > 0 && friends.map((friend, index) => {
                 return (
                     <Link key={index} className='duration-300 hover:text-cyan-300' href={`/profile/${friend}`}>
                         {friend}
@@ -119,6 +156,8 @@ const Profile = () => {
             review.reviews && review.reviews.map(rev => <Link href={`/show/${review.show}`}>{rev.title} - {rev.body}</Link>)
         )}
         <hr/>
+        </div>
+    }
     </div>
   )
 }

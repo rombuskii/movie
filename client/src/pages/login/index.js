@@ -14,7 +14,7 @@ const Login = () => {
         e.preventDefault();
         setErr('')
         if(isLoggingIn) {
-        await axios.post('http://localhost:3001/api/login', {
+        await axios.post(`${process.env.NEXT_PUBLIC_API_BASE}/login`, {
           username,
           password
         },{withCredentials: true}).then(response => {
@@ -26,7 +26,7 @@ const Login = () => {
             setErr('Invalid login details')
         });
     } else {
-        await axios.post('http://localhost:3001/api/register', {
+        await axios.post(`${process.env.NEXT_PUBLIC_API_BASE}/register`, {
           username,
           password
         },{withCredentials: true}).then(response => {

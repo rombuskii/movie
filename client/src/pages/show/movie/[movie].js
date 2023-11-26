@@ -11,7 +11,7 @@ export async function getServerSideProps(context) {
     console.log(id)
     let movie = await fetch(`https://consumet-pied.vercel.app/movies/flixhq/info?id=movie/${id}`)
     .then(response => response.json())
-    let reviews = await fetch(`http://localhost:3001/api/review/movie/${id}`)
+    let reviews = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/review/movie/${id}`)
     .then(response => response.json());
 
     return {
@@ -34,32 +34,38 @@ const Movie = ({movie, reviews}) => {
     const getShelf = async() => {
         const username = user?.username
         console.log(username)
-        const {data} = await axios.get(`http://localhost:3001/api/showshelf/${username}`);
+        const {data} = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE}/showshelf/${username}`);
+        if(data?.favorites) {
             if(data.favorites.some(fav => fav === 'movie/' + id)) {
                 setLiked(true);
             }
+        }
+        if(data?.ratings) {
             const rating = data.ratings.find(rating => rating.title === movie.title)
             if(rating) {
                 setRating(rating.rating);
             }
+        }
     }
 
     useEffect(() => {
-        getShelf(); 
+        if(user) getShelf(); 
     }, [])
 
     const updateRating = async(newRating, name) => {
         if(!user) {
             toast({
-                title: 'User Not Logged In',
+                title: 'Not Logged In',
                 description: "Login for user functionality.",
                 status: 'error',
                 duration: 2000,
                 isClosable: true,
             })
+            router.push('/login');
+            return;
         }
         setRating(parseInt(newRating));
-        axios.post(`http://localhost:3001/api/rating/movie/${id}`, {
+        axios.post(`${process.env.NEXT_PUBLIC_API_BASE}/rating/movie/${id}`, {
             rating: newRating,
             title: movie.title,
             username: user.username
@@ -75,15 +81,16 @@ const Movie = ({movie, reviews}) => {
     const favorite = async() => {
         if(!user) {
             toast({
-                title: 'User Not Logged In',
+                title: 'Not Logged In',
                 description: "Login for user functionality.",
                 status: 'error',
                 duration: 2000,
                 isClosable: true,
             })
+            router.push('/login');
             return;
         }
-        axios.put(`http://localhost:3001/api/favorite/movie/${id}`, {
+        axios.put(`${process.env.NEXT_PUBLIC_API_BASE}/favorite/movie/${id}`, {
             username: user.username
         })
         if(liked) {
@@ -110,7 +117,17 @@ const Movie = ({movie, reviews}) => {
 
     const handleSubmit = async(e) => {
         e.preventDefault();
-        if(!user) return;
+        if(!user) {
+            toast({
+                title: 'Not Logged In',
+                description: "Login for user functionality.",
+                status: 'error',
+                duration: 2000,
+                isClosable: true,
+            })
+            router.push('/login');
+            return;
+        };
         let newReviews; 
         if(!movieReview) {
             newReviews = [{user: user.username, body:input, title: movie.title}]
@@ -118,7 +135,7 @@ const Movie = ({movie, reviews}) => {
             newReviews = [...movieReview, {user: user.username, body:input, title: movie.title}]
          }
         setMovieReview(newReviews);
-        await axios.post('http://localhost:3001/api/review', {
+        await axios.post(`${process.env.NEXT_PUBLIC_API_BASE}/review`, {
             user: user.username,
             show: 'movie/' + id,
             content: input,
@@ -131,14 +148,17 @@ const Movie = ({movie, reviews}) => {
         e.preventDefault();
         const newReviews = movieReview.filter((review, i) => i !== index);
         setMovieReview(newReviews)
-        await axios.delete(`http://localhost:3001/api/review/movie/${id}/${reviewId}`)
+        await axios.delete(`${process.env.NEXT_PUBLIC_API_BASE}/review/movie/${id}/${reviewId}`)
     }
 
   return (
     <>
     {
     <div className='mb-3 flex flex-col gap-5 justify-center items-center'>
-        <h1 className='text-2xl'>{movie.title} <i onClick={favorite} className={`duration-300 text-md sm:text-lg md:text-xl lg:text-2xl hover:scale-110  cursor-pointer select-none ${liked ? 'text-red-500 fa-solid' : 'fa-regular'} fa-heart`}></i></h1>
+        <h1 className='text-2xl'>{movie.title} <i onClick={favorite} 
+        className={`duration-300 text-md sm:text-lg md:text-xl lg:text-2xl hover:scale-110  cursor-pointer select-none 
+                ${liked ? 'text-red-500 fa-solid' : 'fa-regular'} fa-heart`}></i>
+        </h1>
         <span className='flex gap-3'>
         {movie.genres.map((genre, index) => {
             return (
@@ -164,7 +184,7 @@ const Movie = ({movie, reviews}) => {
                 {movieReview?.map((review, index) => {
                     return (
                         <span className='flex justify-between'>
-                        <p key={index}>{review.user}: {review.body}</p>
+                        <p key={index}><Link className='hover:text-pink-500 duration-300 cursor-pointer' href={`/profile/${review.user}`}>{review.user}</Link>: {review.body}</p>
                         {(review.user == user?.username || user?.admin) && <p onClick={e => deleteReview(e, index, review._id)} className='duration-300 hover:scale-110 cursor-pointer p-2'>❌</p>}
                         </span>
                     )

@@ -19,11 +19,11 @@ export const UserProvider = ({children}) => {
     const logout = async() => {
         setUser(undefined);
         setIsAuthenticated(false)
-        await axios.get('http://localhost:3001/api/logout', {withCredentials: true})
+        await axios.get(`${process.env.NEXT_PUBLIC_API_BASE}/logout`)
     }
 
     const getUser = async() => {
-        await axios.get('http://localhost:3001/api/user', {withCredentials: true})
+        await axios.get(`${process.env.NEXT_PUBLIC_API_BASE}/user`, {withCredentials: true})
         .then(response => {
             setUser(response.data)
             setIsAuthenticated(true);

@@ -5,12 +5,13 @@ import React, {useState, useEffect} from 'react'
 import axios from 'axios'
 import StarRatings from 'react-star-ratings'
 import { useToast } from '@chakra-ui/react'
+import Link from 'next/link'
 
 export async function getServerSideProps(context) {
   const id = 'tv/' + context.params.show
   let show = await fetch(`https://consumet-pied.vercel.app/movies/flixhq/info?id=${id}`)
   .then(response => response.json())
-  let reviews = await fetch(`http://localhost:3001/api/review/${id}`)
+  let reviews = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/review/${id}`)
     .then(response => response.json());
 
   return {
@@ -32,31 +33,38 @@ const Show = ({show, reviews}) => {
     const getShelf = async() => {
         const username = user?.username
         console.log(username)
-        const {data} = await axios.get(`http://localhost:3001/api/showshelf/${username}`);
-            if(data.favorites.some(fav => fav === 'tv/' + id)) {
-                setLiked(true);
-            }
-            const rating = data.ratings.find(rating => rating.title === show.title)
-            if(rating) {
-                setRating(rating.rating);
-            }
+        const {data} = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE}/showshelf/${username}`);
+        if(data?.favorites) {
+        const fav = data.favorites.find(fav => fav === 'tv/' + id);
+        if(fav) {
+            setLiked(true);
+        }
+    }
+        if(data?.ratings) {
+        const rating = data.ratings.find(rating => rating.title === show.title)
+        if(rating) {
+            setRating(rating.rating);
+        }
+    }
     }
     useEffect(() => {
-        getShelf(); 
+        if(user) getShelf(); 
     }, [])
 
     const updateRating = async(newRating, name) => {
         if(!user) {
             toast({
-                title: 'User Not Logged In',
+                title: 'Not Logged In',
                 description: "Login for user functionality.",
                 status: 'error',
                 duration: 2000,
                 isClosable: true,
             })
+            router.push('/login');
+            return;
         }
         setRating(parseInt(newRating));
-        axios.post(`http://localhost:3001/api/rating/tv/${id}`, {
+        axios.post(`${process.env.NEXT_PUBLIC_API_BASE}/rating/tv/${id}`, {
             rating: newRating,
             title: show.title,
             username: user.username
@@ -72,15 +80,16 @@ const Show = ({show, reviews}) => {
     const favorite = async() => {
         if(!user) {
             toast({
-                title: 'User Not Logged In',
+                title: ' Not Logged In',
                 description: "Login for user functionality.",
                 status: 'error',
                 duration: 2000,
                 isClosable: true,
             })
+            router.push('/login');
             return;
         }
-        axios.put(`http://localhost:3001/api/favorite/tv/${id}`, {
+        axios.put(`${process.env.NEXT_PUBLIC_API_BASE}/favorite/tv/${id}`, {
             username: user.username
         })
         if(liked) {
@@ -107,7 +116,17 @@ const Show = ({show, reviews}) => {
 
     const handleSubmit = async(e) => {
       e.preventDefault();
-      if(!user) return;
+      if(!user) {
+        toast({
+            title: 'Not Logged In',
+            description: "Login for user functionality.",
+            status: 'error',
+            duration: 2000,
+            isClosable: true,
+        })
+        router.push('/login');
+        return;
+    };
       let newReviews; 
       if(!showReview) {
           newReviews = [{user: user.username, body:input, title: show.title}]
@@ -115,7 +134,7 @@ const Show = ({show, reviews}) => {
           newReviews = [...showReview, {user: user.username, body:input, title: show.title}]
        }
       setShowReview(newReviews);
-      await axios.post('http://localhost:3001/api/review', {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_BASE}/review`, {
           user: user.username,
           show: 'tv/' + id,
           title: show.title,
@@ -128,7 +147,7 @@ const Show = ({show, reviews}) => {
     e.preventDefault();
     const newReviews = showReview.filter((review, i) => i !== index);
     setShowReview(newReviews)
-    await axios.delete(`http://localhost:3001/api/review/tv/${id}/${reviewId}`)
+    await axios.delete(`${process.env.NEXT_PUBLIC_API_BASE}/review/tv/${id}/${reviewId}`)
   }
   
 
@@ -161,7 +180,7 @@ const Show = ({show, reviews}) => {
                 {showReview?.map((review, index) => {
                     return (
                         <span className='flex justify-between'>
-                        <p key={index}>{review.user}: {review.body}</p>
+                        <p key={index}><Link className='hover:text-pink-500 duration-300 cursor-pointer' href={`/profile/${review.user}`}>{review.user}</Link>: {review.body}</p>
                         {(review.user == user?.username || user?.admin) && <p onClick={e => deleteReview(e, index, review._id)} className='duration-300 hover:scale-110 cursor-pointer p-2'>❌</p>}
                         </span>
                     )
