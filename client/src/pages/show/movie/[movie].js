@@ -43,7 +43,7 @@ const Movie = ({ movie, reviews }) => {
             setOnList(true);
         }
         if (data.ratings !== undefined) {
-            const rating = data.ratings.find(rating => rating.title === movie.title)
+            const rating = data.ratings.find(rating => rating.title === movie.title);
         }
         if (rating) {
             setRating(rating.rating);

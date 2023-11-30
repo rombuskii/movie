@@ -24,8 +24,8 @@ const Show = ({show, reviews}) => {
     const id = router.query.show;
     const toast = useToast();
     const {user} = useUser();
-    const [showReview, setShowReview] = useState(reviews?.reviews)
-    const [input, setInput] = useState('')
+    const [showReview, setShowReview] = useState(reviews?.reviews);
+    const [input, setInput] = useState('');
     const [rating, setRating] = useState();
     const [liked, setLiked] = useState(false);
     const [onList, setOnList] = useState(false);
