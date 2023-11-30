@@ -10,7 +10,7 @@ export async function getServerSideProps(context) {
   const id = 'tv/' + context.params.show
   let show = await fetch(`https://consumet-pied.vercel.app/movies/flixhq/info?id=${id}`)
   .then(response => response.json())
-  let reviews = await fetch(`http://localhost:3001/api/review/tv/${id}`)
+  let reviews = await fetch(`http://localhost:3001/api/review/${id}`)
     .then(response => response.json());
 
   return {
@@ -37,11 +37,11 @@ const Show = ({show, reviews}) => {
             if(data.favorites !== undefined && data.favorites.some(fav => fav === 'tv/' + id)) {
                 setLiked(true);
             }
-            if (data.watchlist !== undefined && data.watchlist.some(on => on === 'movie/' + id)) {
+            if (data.watchlist !== undefined && data.watchlist.some(on => on === 'tv/' + id)) {
                 setOnList(true);
             }
             if (data.ratings !== undefined) {
-                const rating = data.ratings.find(rating => rating.title === movie.title)
+                const rating = data.ratings.find(rating => rating.title === show.title)
             }
             if(rating) {
                 setRating(rating.rating);
