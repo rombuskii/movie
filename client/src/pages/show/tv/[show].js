@@ -10,7 +10,7 @@ export async function getServerSideProps(context) {
   const id = 'tv/' + context.params.show
   let show = await fetch(`https://consumet-pied.vercel.app/movies/flixhq/info?id=${id}`)
   .then(response => response.json())
-  let reviews = await fetch(`http://localhost:3001/api/review/${id}`)
+  let reviews = await fetch(`http://localhost:3001/api/review/tv/${id}`)
     .then(response => response.json());
 
   return {
@@ -28,15 +28,21 @@ const Show = ({show, reviews}) => {
     const [input, setInput] = useState('')
     const [rating, setRating] = useState();
     const [liked, setLiked] = useState(false);
+    const [onList, setOnList] = useState(false);
 
     const getShelf = async() => {
         const username = user?.username
         console.log(username)
         const {data} = await axios.get(`http://localhost:3001/api/showshelf/${username}`);
-            if(data.favorites.some(fav => fav === 'tv/' + id)) {
+            if(data.favorites !== undefined && data.favorites.some(fav => fav === 'tv/' + id)) {
                 setLiked(true);
             }
-            const rating = data.ratings.find(rating => rating.title === show.title)
+            if (data.watchlist !== undefined && data.watchlist.some(on => on === 'movie/' + id)) {
+                setOnList(true);
+            }
+            if (data.ratings !== undefined) {
+                const rating = data.ratings.find(rating => rating.title === movie.title)
+            }
             if(rating) {
                 setRating(rating.rating);
             }
@@ -105,6 +111,42 @@ const Show = ({show, reviews}) => {
         setLiked(prev => !prev);
     }
 
+    const watchlist = async () => {
+        if (!user) {
+            toast({
+                title: 'User Not Logged In',
+                description: "Login for user functionality.",
+                status: 'error',
+                duration: 2000,
+                isClosable: true,
+            })
+            return;
+        }
+        axios.put(`http://localhost:3001/api/watchlist/tv/${id}`, {
+            username: user.username
+        })
+        if (onList) {
+            toast({
+                title: 'Removed From Watchlsit',
+                description: "",
+                status: 'error',
+                duration: 2000,
+                isClosable: true,
+            })
+        }
+        if (!onList) {
+            toast({
+                title: 'Added to Watchlist',
+                description: "",
+                status: 'success',
+                duration: 2000,
+                isClosable: true,
+            })
+
+        }
+        setOnList(prev => !prev);
+    }
+
     const handleSubmit = async(e) => {
       e.preventDefault();
       if(!user) return;
@@ -135,7 +177,11 @@ const Show = ({show, reviews}) => {
   return (
     <>
     <div className='mb-3 flex flex-col gap-5 justify-center items-center'>
-        <h1 className='text-2xl'>{show.title} <i onClick={favorite} className={`duration-300 text-md sm:text-lg md:text-xl lg:text-2xl hover:scale-110  cursor-pointer select-none ${liked ? 'text-red-500 fa-solid' : 'fa-regular'} fa-heart`}></i></h1>
+        <h1 className='text-2xl'>{show.title} 
+        <i onClick={favorite} className={`duration-300 text-md sm:text-lg md:text-xl lg:text-2xl hover:scale-110  cursor-pointer select-none
+         ${liked ? 'text-red-500 fa-solid' : 'fa-regular'} fa-heart`}></i>
+         <i onClick={watchlist} className={`mx-2 duration-300 text-md sm:text-lg md:text-xl lg:text-2xl hover:scale-110  cursor-pointer select-none fa-solid
+        ${onList ? 'fa-check' : 'fa-plus'}`}></i></h1>
         <span className='flex gap-3'>
         {show.genres.map((genre, index) => {
             return (

@@ -3,7 +3,7 @@ const session = require('express-session')
 const mongoose = require('mongoose');
 const app  = express();
 const MongoStore = require('connect-mongo');
-const cors = require('cors')
+var cors = require('cors')
 require('dotenv').config();
 const User = require('./models/user.model')
 const Review = require('./models/review.model')
@@ -130,9 +130,9 @@ app.get('/api/review/tv/:id', async(req, res) => {
 })
 
 app.get('/api/review/movie/:id', async(req, res) => {
-    const show  = 'movie/' + req.params.id
-    const showReview = await Review.findOne({show: show})
-    res.json(showReview)
+    const movie  = 'movie/' + req.params.id
+    const movieReview = await Review.findOne({movie: movie})
+    res.json(movieReview)
 })
 
 app.get('/api/review/:user', async(req, res) => {
@@ -164,6 +164,28 @@ app.put('/api/favorite/tv/:id', async(req, res) => {
         } else {
         updatedFavs.push(show);
         await ShowShelf.updateOne({user: username}, { $set: {favorites: updatedFavs}})
+    }
+    }
+});
+
+app.put('/api/watchlist/tv/:id', async(req, res) => {
+    const show  = 'tv/' + req.params.id
+    const {username} = req.body;
+    if(!username) {
+        return res.status(400).send('No user')
+    }
+    const showshelf = await ShowShelf.findOne({user: username})
+    if(!showshelf) {
+        await ShowShelf.create({user: username, watchlist: [show], ratings: []});
+    } else {
+        const updatedList = showshelf.watchlist;
+        if(updatedList.some(r => r === show)) {
+        const filtered = updatedListfilter((id) => id !== show);
+        console.log(filtered)
+        await ShowShelf.updateOne({user: username}, { $set: {watchlist: filtered}})
+        } else {
+        updatedList.push(show);
+        await ShowShelf.updateOne({user: username}, { $set: {watchlist: updatedList}})
     }
     }
 });
@@ -210,7 +232,7 @@ app.put('/api/watchlist/movie/:id', async(req, res) => {
         await ShowShelf.updateOne({user: username}, { $set: {watchlist: filtered}})
         } else {
         updatedList.push(movie);
-        await ShowShelf.updateOne({user: username}, { $set: {watchlist: updatedFavs}})
+        await ShowShelf.updateOne({user: username}, { $set: {watchlist: updatedList}})
     }
     }
     res.end();
