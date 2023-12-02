@@ -169,6 +169,7 @@ app.put('/api/favorite/tv/:id', async(req, res) => {
         await ShowShelf.updateOne({user: username}, { $set: {favorites: updatedFavs}})
     }
     }
+    res.end();
 });
 
 app.put('/api/favorite/movie/:id', async(req, res) => {
@@ -251,8 +252,6 @@ app.get('/api/showshelf/:username', async(req, res) => {
     }
     const showshelf = await ShowShelf.findOne({user: username})
     res.send(showshelf);
-
-
 })
 
 app.delete('/api/review/movie/:id/:reviewId', async(req,res) => {
@@ -358,8 +357,29 @@ app.post('/api/logout', async(req, res) => {
     res.send('Logged out');
 });
 
+app.put('/api/users/:username', async(req, res) => {
+    const { username } = req.params;
+    const hashedPassword = await bcrypt.hash(req.body.password, 10)
+    const updatedUser = {...req.body, password: hashedPassword};
+    let user = await User.findOne({username: username})
+    if(!user) {
+        res.status(400).send("User doesn't exist");
+    }
+    
+    let newUser = clone = JSON.parse(JSON.stringify(user));
+    await User.updateOne({username: username}, {...newUser, ...updatedUser});
+    const users = await User.find({});
+    res.json(users);
+})
 
-//
+app.delete('/api/users/:username', async(req, res) => {
+    const { username } = req.params;
+    await User.deleteOne({username: username});
+    await ShowShelf.deleteOne({user: username});
+    await Review.updateMany({}, {$pull: {reviews: {user: username}}}, {multi: true})
+    res.send(200);
+})
+
 
 app.listen(PORT, () => {
     console.log(`Server listening at port ${PORT} `)

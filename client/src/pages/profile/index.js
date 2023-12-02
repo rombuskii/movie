@@ -3,6 +3,7 @@ import { useUser } from '@/context/UserContext'
 import axios from 'axios'
 import Link from 'next/link'
 import { useToast } from '@chakra-ui/react'
+import isAuth from '@/components/isAuth'
 
 
 const Profile = () => {
@@ -125,15 +126,6 @@ const Profile = () => {
             <button className='border duration-300 mx-auto w-full max-w-[80ch] hover:border-2 hover:scale-110 bg-red-500 text-white rounded-xl p-2' type='submit'>Change Password</button>
         </form>
         <hr/>
-        <form onSubmit={updateAccount} className='mt-2 text-xl flex gap-3 flex-col'>
-            <h1 className='text-2xl'>Account Details</h1>
-            <label htmlFor='birthday'>Birthday:</label>
-            <input value={birthday} onChange={e => setBirthday(e.target.value)} id='birthday' type='date' className='focus:border-black border-2 outline-none w-full max-w-[50ch] p-2 rounded-lg text-black'/>
-            <label htmlFor='email'>Email:</label>
-            <input value={email} onChange={e => setEmail(e.target.value)} id='email' type='text' className='focus:border-black border-2 outline-none w-full max-w-[50ch] p-2 rounded-lg text-black'/>
-            <button className='border duration-300 mx-auto w-full max-w-[80ch] hover:border-2 hover: hover:scale-110 bg-cyan-500 text-white rounded-xl p-2' type='submit'>Update Profile</button>
-        </form>
-        <hr/>
         <form onSubmit={addFriend} className='mt-2 text-xl flex gap-3 flex-col'>
             <h1 className='text-2xl'>Friends</h1>
             {user && friends?.length === 0 && <p>No friends yet :/</p>}
@@ -162,4 +154,4 @@ const Profile = () => {
   )
 }
 
-export default Profile
+export default Profile;

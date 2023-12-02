@@ -13,6 +13,8 @@ const Navbar = () => {
         setUser(undefined);
         setIsAuthenticated(false)
         await axios.post(`${process.env.NEXT_PUBLIC_API_BASE}/logout`, {}, {withCredentials: true})
+        router.push('/');
+        router.refresh();
     }
 
     const handleSubmit = (e) => {

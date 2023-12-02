@@ -10,6 +10,13 @@ const Login = () => {
     const [isLoggingIn, setIsLoggingIn] = useState(true)
     const router = useRouter();
 
+    useEffect(() => {
+      if(user) {
+        router.push('/')
+      }
+      return;
+    }, [])
+
     const handleSubmit = async(e) => {
         e.preventDefault();
         setErr('')

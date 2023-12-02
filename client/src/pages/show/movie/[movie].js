@@ -5,6 +5,7 @@ import React, {useState, useEffect} from 'react'
 import axios from 'axios'
 import StarRatings from 'react-star-ratings'
 import { useToast } from '@chakra-ui/react'
+import Link from 'next/link'
 
 export async function getServerSideProps(context) {
     const id =  context.params.movie
@@ -184,7 +185,7 @@ const Movie = ({movie, reviews}) => {
                 {movieReview?.map((review, index) => {
                     return (
                         <span className='flex justify-between'>
-                        <p key={index}><Link className='hover:text-pink-500 duration-300 cursor-pointer' href={`/profile/${review.user}`}>{review.user}</Link>: {review.body}</p>
+                        <p key={index}><Link className='hover:text-pink-500 duration-300 cursor-pointer' href={review.user === user.username ? `/profile` :`/profile/${review.user}`}>{review.user}</Link>: {review.body}</p>
                         {(review.user == user?.username || user?.admin) && <p onClick={e => deleteReview(e, index, review._id)} className='duration-300 hover:scale-110 cursor-pointer p-2'>❌</p>}
                         </span>
                     )
