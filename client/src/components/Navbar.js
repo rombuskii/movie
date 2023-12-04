@@ -31,7 +31,7 @@ const Navbar = () => {
             <form className='w-full max-w-[30ch]' onSubmit={handleSubmit}>
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder='Search Shows' className='duration-300 border-2 outline-none focus:border-black text-black rounded-lg p-1 w-full max-w-[30ch]' type='text'/>
             </form>
-            <div className='flex gap-2 xl:gap-5 items-center'>
+            <div className='flex gap-2 xl:gap-5 text-sm xl:text-md items-center'>
             {user !== undefined && user.admin && <Link className='duration-300 hover:text-red-500' href='/admin'>Admin</Link>}
                 {user !== undefined && <Link className='duration-300 hover:text-white' href='/profile'>{/*user.username.charAt(0).toUpperCase() + user.username.slice(1)*/`Profile`}</Link>}
                 {<Link className='duration-300 hover:text-white' href='/profile/search'>{/*user.username.charAt(0).toUpperCase() + user.username.slice(1)*/`Search Profiles`}</Link>}
