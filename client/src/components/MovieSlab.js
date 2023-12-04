@@ -4,6 +4,7 @@ import Link from 'next/link'
 
 const MovieSlab = ({movie}) => {
   return (
+    <div className='w-14'>
     <Link className='mx-10' href={`/show/${movie.id}`}>
       <Image className='rounded-md duration-300 hover:scale-110' sizes="100px"
       fill
@@ -14,6 +15,7 @@ const MovieSlab = ({movie}) => {
         height: 'auto',
       }} src={movie.image}></Image>
     </Link>
+    </div>
   )
 }
 
