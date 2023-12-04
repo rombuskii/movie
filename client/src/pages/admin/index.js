@@ -117,7 +117,7 @@ const Admin = () => {
         )}
       </div>
       <h2 className='text-center text-xl my-2 '>Users</h2>
-      <div className='grid grid-cols-5 border-2 rounded-md'>
+      <div className='grid grid-cols-3 xl:grid-cols-5 border-2 rounded-md'>
         {users.length > 0 && users.map((user, index) => {
         return (
           <div className='flex p-2 m-2'>
