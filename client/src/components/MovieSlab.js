@@ -5,7 +5,14 @@ import Link from 'next/link'
 const MovieSlab = ({movie}) => {
   return (
     <Link className='mx-10' href={`/show/${movie.id}`}>
-      <Image className='rounded-md duration-300 hover:scale-110'  width={50} height={50} src={movie.image}></Image>
+      <Image className='rounded-md duration-300 hover:scale-110' sizes="100px"
+      fill
+      width={100}
+      height={100}
+      style={{
+        width: '100%',
+        height: 'auto',
+      }} src={movie.image}></Image>
     </Link>
   )
 }
