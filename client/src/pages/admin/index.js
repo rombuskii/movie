@@ -117,10 +117,10 @@ const Admin = () => {
         )}
       </div>
       <h2 className='text-center text-xl my-2 '>Users</h2>
-      <div className='grid grid-cols-3 xl:grid-cols-5 border-2 rounded-md'>
+      <div className='grid grid-cols-2 xl:grid-cols-5 border-2 rounded-md'>
         {users.length > 0 && users.map((user, index) => {
         return (
-          <div className='flex p-2 m-2'>
+          <div className='flex p-1 xl:p-2 m-1 xl:m-2'>
           <p className='bg-black hover:bg-white hover:text-black duration-300 cursor-pointer p-2 rounded-sm' onClick={(e) => getUser(e, user)}  key={index}>{user.username}</p>
           <button onClick={(e) => deleteUser(e, user)} className="bg-red-500 hover:text-black duration-300 cursor-pointer p-2 rounded-sm">
                     <FaTrash />
