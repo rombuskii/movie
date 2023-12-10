@@ -46,13 +46,8 @@ const Admin = () => {
     const deleteShow = async(e, id) => {
       e.preventDefault();
       const index = id.indexOf('/');
-      if(id.includes('tv')) {
-        const show = id.slice(index + 1);
-        await axios.put(`${process.env.NEXT_PUBLIC_API_BASE}/favorite/tv/${show}`, {username: currentUser.username})
-      } else {
-        const movie = id.slice(index + 1);
-        await axios.put(`${process.env.NEXT_PUBLIC_API_BASE}/favorite/movie/${movie}`, {username: currentUser.username})
-      }
+      const movie = id.slice(index + 1);
+      await axios.put(`${process.env.NEXT_PUBLIC_API_BASE}/favorite/movie/${movie}`, {username: currentUser.username})
       const filtered = showShelf.favorites.filter((fav) => fav != id);
       setShowShelf({...showShelf, favorites: filtered});
       toast({

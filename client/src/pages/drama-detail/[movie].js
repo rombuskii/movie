@@ -8,9 +8,10 @@ import { useToast } from '@chakra-ui/react'
 import Link from 'next/link'
 
 export async function getServerSideProps(context) {
-    const id =  context.params.movie
+    const id = context.params.movie
+    const full = "drama-detail/" + context.params.movie
     console.log(id)
-    let movie = await fetch(`https://consumet-pied.vercel.app/movies/flixhq/info?id=movie/${id}`)
+    let movie = await fetch(`https://consumet-pied.vercel.app/movies/dramacool/info?id=${full}`)
     .then(response => response.json())
     let reviews = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/review/movie/${id}`)
     .then(response => response.json());
@@ -37,7 +38,7 @@ const Movie = ({movie, reviews}) => {
         console.log(username)
         const {data} = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE}/showshelf/${username}`);
         if(data?.favorites) {
-            if(data.favorites.some(fav => fav === 'movie/' + id)) {
+            if(data.favorites.some(fav => fav === "drama-detail/" + id)) {
                 setLiked(true);
             }
         }
@@ -138,7 +139,7 @@ const Movie = ({movie, reviews}) => {
         setMovieReview(newReviews);
         await axios.post(`${process.env.NEXT_PUBLIC_API_BASE}/review`, {
             user: user.username,
-            show: 'movie/' + id,
+            show: "drama-detail/" + id,
             content: input,
             title: movie.title
         })
@@ -161,11 +162,11 @@ const Movie = ({movie, reviews}) => {
                 ${liked ? 'text-red-500 fa-solid' : 'fa-regular'} fa-heart`}></i>
         </h1>
         <span className='flex gap-3'>
-        {movie.genres.map((genre, index) => {
+        {/*movie.genres.map((genre, index) => {
             return (
                 <p key={index}>{genre}</p>
             )
-        })}
+        })*/}
         </span>
         
         <Image className='rounded-lg' src={movie.image} width={200} height={200}/>
@@ -185,7 +186,7 @@ const Movie = ({movie, reviews}) => {
                 {movieReview?.map((review, index) => {
                     return (
                         <span className='flex justify-between'>
-                        <p key={index}><Link className='hover:text-pink-500 duration-300 cursor-pointer' href={review.user === user.username ? `/profile` :`/profile/${review.user}`}>{review.user}</Link>: {review.body}</p>
+                        <p key={index}><Link className='hover:text-pink-500 duration-300 cursor-pointer' href={review.user === user?.username ? `/profile` :`/profile/${review.user}`}>{review.user}</Link>: {review.body}</p>
                         {(review.user == user?.username || user?.admin) && <p onClick={e => deleteReview(e, index, review._id)} className='duration-300 hover:scale-110 cursor-pointer p-2'>❌</p>}
                         </span>
                     )

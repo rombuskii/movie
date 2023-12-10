@@ -126,14 +126,9 @@ app.post('/api/register' , async(req, res, next) => {
     })
 })
 
-app.get('/api/review/tv/:id', async(req, res) => {
-    const show  = 'tv/' + req.params.id
-    const showReview = await Review.findOne({show: show})
-    res.json(showReview)
-})
 
 app.get('/api/review/movie/:id', async(req, res) => {
-    const show  = 'movie/' + req.params.id
+    const show  = "drama-detail/" + req.params.id
     const showReview = await Review.findOne({show: show})
     res.json(showReview)
 })
@@ -149,31 +144,9 @@ app.get('/api/review/:user', async(req, res) => {
     res.json(cleanReviews)
 })
 
-app.put('/api/favorite/tv/:id', async(req, res) => {
-    const show  = 'tv/' + req.params.id
-    const {username} = req.body;
-    if(!username) {
-        return res.status(400).send('No user')
-    }
-    const showshelf = await ShowShelf.findOne({user: username})
-    if(!showshelf) {
-        await ShowShelf.create({user: username, favorites: [show], ratings: []});
-
-    } else {
-        const updatedFavs = showshelf.favorites;
-        if(updatedFavs.some(r => r === show)) {
-        const filtered = updatedFavs.filter((id) => id !== show);
-        await ShowShelf.updateOne({user: username}, { $set: {favorites: filtered}})
-        } else {
-        updatedFavs.push(show);
-        await ShowShelf.updateOne({user: username}, { $set: {favorites: updatedFavs}})
-    }
-    }
-    res.end();
-});
 
 app.put('/api/favorite/movie/:id', async(req, res) => {
-    const movie  = 'movie/' + req.params.id
+    const movie  = "drama-detail/" + req.params.id
     const {username} = req.body;
     if(!username) {
         return res.status(400).send('No user')
@@ -195,33 +168,9 @@ app.put('/api/favorite/movie/:id', async(req, res) => {
     res.end();
 });
 
-app.post('/api/rating/tv/:id', async(req, res) => {
-    const show  = 'tv/' + req.params.id
-    const {rating, title, username} = req.body;
-    if(!username) {
-        return res.status(400).send('No user')
-    }
-    const showshelf = await ShowShelf.findOne({user: username})
-    if(!showshelf) {
-        await ShowShelf.create({user: username, favorites: [], ratings: [{rating: rating, id: show, title: title}]});
-    } else {
-        const updatedRatings = showshelf.ratings;
-        if(updatedRatings.some(r => r.title === title)) {
-            updatedRatings.map((show, i) => {
-                if(show.title === title) {
-                    show.rating = rating
-                }
-                return show
-            })
-        } else {
-            updatedRatings.push({rating: rating, id: show, title: title});
-        }
-        await ShowShelf.updateOne({user: username}, { $set: {ratings: updatedRatings}})
-    }
-});
 
 app.post('/api/rating/movie/:id', async(req, res) => {
-    const movie  = 'movie/' + req.params.id
+    const movie  = "drama-detail/" + req.params.id
     const {rating, title, username} = req.body;
     if(!username) {
         return res.status(400).send('No user')
@@ -255,7 +204,7 @@ app.get('/api/showshelf/:username', async(req, res) => {
 })
 
 app.delete('/api/review/movie/:id/:reviewId', async(req,res) => {
-    const show  = 'movie/' + req.params.id
+    const show  = "drama-detail/" + req.params.id
     const reviewId = req.params.reviewId
     await Review.updateOne({show: show}, {$pull: {reviews: {_id: reviewId}}})
     res.end();
@@ -267,15 +216,9 @@ app.get('/api/friends/:username', async(req, res) => {
     res.send(user?.friends);
 })
 
-app.delete('/api/review/tv/:id/:reviewId', async(req,res) => {
-    const show  = 'tv/' + req.params.id
-    const reviewId = req.params.reviewId
-    await Review.updateOne({show: show}, {$pull: {reviews: {_id: reviewId}}})
-    res.end();
-})
 
 app.delete('/api/review/movie/:id/:reviewId', async(req,res) => {
-    const show  = 'movie/' + req.params.id
+    const show  = "drama-detail/" + req.params.id
     const reviewId = req.params.reviewId
     await Review.updateOne({show: show}, {$pull: {reviews: {_id: reviewId}}})
     res.end();
