@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ["img.flixhq.to"]
+    domains: ["imagecdn.me"]
   }
 }
 

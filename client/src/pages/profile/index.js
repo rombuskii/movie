@@ -145,7 +145,7 @@ const Profile = () => {
         <hr/>
         <h1 className='text-2xl'>Comments</h1>
         {reviews.length > 0 && reviews.map((review, i) => 
-            review.reviews && review.reviews.map(rev => <Link href={`/show/${review.show}`}>{rev.title} - {rev.body}</Link>)
+            review.reviews && review.reviews.map(rev => <Link href={`/${review.show}`}>{rev.title} - {rev.body}</Link>)
         )}
         <hr/>
         </div>

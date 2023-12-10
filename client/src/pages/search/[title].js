@@ -4,7 +4,7 @@ import MovieTile from '@/components/MovieTile'
 
 export async function getServerSideProps(context) {
     const title = context.params.title
-    let movies = await fetch(`https://consumet-pied.vercel.app/movies/flixhq/${title}`)
+    let movies = await fetch(`https://consumet-pied.vercel.app/movies/dramacool/${title}`)
     .then(response => response.json())
 
     return {

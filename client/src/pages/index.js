@@ -10,7 +10,7 @@ import * as client from '../util/client.js'
 const inter = Inter({ subsets: ['latin'] })
 
 export async function getServerSideProps(context) {
-  let movies = await fetch(`https://consumet-pied.vercel.app/movies/flixhq/sonic`)
+  let movies = await fetch(`https://consumet-pied.vercel.app/movies/dramacool/squid`)
   .then(response => response.json())
   return {
       props: {movies}
