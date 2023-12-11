@@ -173,7 +173,7 @@ const Movie = ({movie, reviews}) => {
         <p>{movie.description}</p>
         <div className='p-2 text-black w-full bg-red-300 rounded-xl'>
         <form onSubmit={handleSubmit} className='mb-5'>
-            <div className='flex justify-between'>
+            <div className='flex justify-between items-center'>
             <h1 className='text-xl'>Leave a Review 💖:</h1>
             <StarRatings starDimension='2rem' rating={rating} starHoverColor="yellow" starRatedColor="yellow" changeRating={updateRating} numberOfStars={5} name='rating'/>
             </div>
