@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import { useUser } from '@/context/UserContext'
 import axios from 'axios'
+import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { useToast } from '@chakra-ui/react'
 import isAuth from '@/components/isAuth'
@@ -9,6 +10,7 @@ import isAuth from '@/components/isAuth'
 const Profile = () => {
     const {user} = useUser();
     const toast = useToast();
+    const router = useRouter();
     const [username, setUsername] = useState(user?.username)
     const [oldPassword, setOldPassword] = useState('')
     const [newPassword, setNewPassword] = useState('')
@@ -37,7 +39,9 @@ const Profile = () => {
             // setFriends(user.friends)
             getReviews();
             getFriends();
-        };
+        } else {
+            router.push('/login')
+        }
     }, [])
 
     const changePassword = async(e) => {
@@ -116,11 +120,12 @@ const Profile = () => {
     }
   return (
     <div className='p-2 flex flex-col gap-5'>
+        {user &&
+        <>
         <div>
         <h1 className='text-2xl'>Username: {user ? user.username : "Guest"}</h1>
         </div>
         <hr/>
-        {user &&
         <div  className='p-2 flex flex-col gap-5'>
         <form onSubmit={changePassword} className='mt-2 text-xl flex gap-3 flex-col'>
             <h1 className='text-2xl'>Reset Password</h1>
@@ -155,6 +160,7 @@ const Profile = () => {
         )}
         <hr/>
         </div>
+        </>
     }
     </div>
   )

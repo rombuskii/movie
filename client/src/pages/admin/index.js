@@ -87,11 +87,11 @@ const Admin = () => {
       <form className='border-2 rounded-md p-2 flex flex-col gap-2 items-center justify-center w-full'>
       <span>
       <label className='mr-2'>Username:</label>
-      <input onChange={(e) => setCurrentUser({...currentUser, username: e.target.value})} value={currentUser.username} className='ml-2 text-black max-w-[30ch] p-2  rounded-xl'/>
+      <input onChange={(e) => setCurrentUser({...currentUser, username: e.target.value})} value={currentUser.username} className='ml-1 text-black max-w-[30ch] p-2  rounded-xl'/>
       </span>
       <span>
       <label className='mr-2'>Password:</label>
-      <input onChange={(e) => setCurrentUser({...currentUser, password: e.target.value})} value={currentUser.password} className='ml-2 text-black max-w-[30ch] p-2  rounded-xl'/>
+      <input onChange={(e) => setCurrentUser({...currentUser, password: e.target.value})} value={currentUser.password} className='ml-1 text-black max-w-[30ch] p-2  rounded-xl'/>
       </span>
       <span>
       <label className='mr-2'>Admin:</label>
