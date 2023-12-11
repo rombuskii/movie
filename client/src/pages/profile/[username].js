@@ -70,7 +70,7 @@ const BrowseProfile =  ({profile,}) => {
       <hr className='border-2 w-full'/>
       <h1 className='text-2xl'>Reviews</h1>
       <hr className='border-2 w-full'/>
-      {user && user.friends.includes(profile.username) &&
+      {user && user.friends.includes(profile.username) || (user && user.admin) &&
       <div className=''>
         <ul>
       {reviews.length > 0 && reviews.map((review, i) => 
@@ -80,7 +80,7 @@ const BrowseProfile =  ({profile,}) => {
       {!reviews && <p>No Reviews Yet :(</p>}
       </div>
       }
-      {!(user && user.friends.includes(profile.username)) && <p>Must be friends to see reviews</p>}
+      {!(user && user.friends.includes(profile.username)) || (user && !user.admin) && <p>Must be friends to see reviews</p>}
       <hr className='border-2 w-full'/>
     </div>
   )

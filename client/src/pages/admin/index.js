@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import axios from 'axios';
 import { FaTrash } from "react-icons/fa";
 import { useToast } from '@chakra-ui/react';
+import Link from 'next/link';
 
 const Admin = () => {
     const {user, isAuthenticated} = useUser();
@@ -82,9 +83,12 @@ const Admin = () => {
 
   return (
     <div>
+      {(user && user.admin) && 
+      <>
       <h1 className='text-center text-3xl mb-2 '>Admin</h1>
       <h2 className='text-center text-xl my-2'>Edit User</h2>
       <form className='border-2 rounded-md p-2 flex flex-col gap-2 items-center justify-center w-full'>
+        <Link href={user.username === currentUser.username ? `/profile` : `/profile/${currentUser.username}`}>{currentUser.username}</Link>
       <span>
       <label className='mr-2'>Username:</label>
       <input onChange={(e) => setCurrentUser({...currentUser, username: e.target.value})} value={currentUser.username} className='ml-1 text-black max-w-[30ch] p-2  rounded-xl'/>
@@ -124,7 +128,8 @@ const Admin = () => {
         )
       })}
       </div>
-
+      </>
+    }
     </div>
   )
 }
